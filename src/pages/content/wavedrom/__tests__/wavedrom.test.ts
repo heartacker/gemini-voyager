@@ -822,4 +822,46 @@ describe('fullscreen SVG sizing and layout', () => {
     expect(styleEl.textContent).toContain('align-items: center');
     expect(styleEl.textContent).toContain('justify-content: center');
   });
+
+  it('injects fallback skin rules so wave lines survive a dead inline style block', async () => {
+    // Regression: if the skin's inline <style> is not applied, paths fall back
+    // to stroke:none + black fill and the timing lines vanish while text
+    // stays visible. The external stylesheet must mirror the light skin.
+    const codeBlock = document.createElement('code-block');
+    const decoration = document.createElement('div');
+    decoration.className = 'code-block-decoration';
+    const span = document.createElement('span');
+    span.textContent = 'wavedrom';
+    decoration.appendChild(span);
+    const codeEl = document.createElement('code');
+    codeEl.setAttribute('data-test-id', 'code-content');
+    codeEl.textContent = '{"signal": [{"name":"clk","wave":"p..."}]}';
+    codeBlock.append(decoration, codeEl);
+    document.body.appendChild(codeBlock);
+
+    processCodeBlocks();
+    await vi.waitFor(() => {
+      expect(document.querySelector('.gv-wavedrom-diagram')).not.toBeNull();
+    });
+
+    const css = (document.getElementById('gv-wavedrom-styles') as HTMLStyleElement).textContent;
+
+    // Wave strokes for inline and fullscreen containers.
+    expect(css).toContain('.gv-wavedrom-diagram svg .s1,');
+    expect(css).toContain('.gv-wavedrom-modal-content svg .s1 {');
+    expect(css).toContain('.s1 {\n      fill: none;\n      stroke: #000;\n      stroke-width: 1;');
+    expect(css).toContain(
+      '.s2 {\n      fill: none;\n      stroke: #000;\n      stroke-width: 0.5;',
+    );
+    expect(css).toContain('stroke-dasharray: 1, 3;'); // s3 dashed edges
+    expect(css).toContain('.s5 {\n      fill: #fff;\n      stroke: none;');
+    expect(css).toContain('.s6 {\n      fill: #000;\n      stroke: none;');
+
+    // Text label colours.
+    expect(css).toContain('.info {\n      fill: #0041c4;');
+    expect(css).toContain('.muted {\n      fill: #aaa;');
+    expect(css).toContain('.warning {\n      fill: #f6b900;');
+    expect(css).toContain('.error {\n      fill: #f60000;');
+    expect(css).toContain('.success {\n      fill: #00ab00;');
+  });
 });

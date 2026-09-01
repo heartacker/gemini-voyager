@@ -58,6 +58,23 @@ output.
   (`restores the source block when explicit WaveDrom becomes invalid` and
   `restores the source block when a rendered generic block gets a specific label`).
 
+## WaveDrom timing lines must survive a dead inline skin style block
+
+- **Trap:** On some Edge/Chromium pages the timing lines in a WaveDrom diagram were invisible
+  while the text labels stayed readable. The bundled WaveDrom skin ships its CSS inside the
+  SVG's own `<style>` block; when that block is not applied by the host page, every `path`
+  falls back to the SVG defaults (`stroke:none` + black `fill`) and the waves render as
+  invisible black-filled polygons, while `text` keeps its default black fill and stays visible.
+  The bug is invisible in normal Chrome, where the inline style always applies.
+- **Rule:** Never rely on the SVG-internal skin stylesheet alone. The external
+  `#gv-wavedrom-styles` sheet must mirror the light skin values (`s1`/`s2`/`s3`/`s4`/`s16`
+  strokes, `s5`/`s6` fills, `info`/`muted`/`warning`/`error`/`success` text colours) for both
+  `.gv-wavedrom-diagram svg` and `.gv-wavedrom-modal-content svg` scopes. Keep the fallback
+  values in sync with `WAVEDROM_THEME_MODE` (`'light'`), since identical specificity means the
+  inline skin style wins whenever it does apply, so normal rendering is unchanged.
+- **Guard:** `src/pages/content/wavedrom/__tests__/wavedrom.test.ts`
+  (`injects fallback skin rules so wave lines survive a dead inline style block`).
+
 ## User export HTML must materialize multiline text
 
 - **Trap:** PDF and image exports collapsed line breaks inside a multiline user prompt even though

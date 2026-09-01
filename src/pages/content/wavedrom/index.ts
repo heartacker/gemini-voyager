@@ -441,6 +441,82 @@ const createStyles = (panelBg: string) => {
       font-family: 'Google Sans', sans-serif;
       pointer-events: none;
     }
+
+    /*
+     * Fallback skin rules. The bundled skin ships its CSS inside the SVG's own
+     * <style> block; if that block is not applied by the host page, wave
+     * strokes would get the SVG default (stroke:none + black fill) and vanish
+     * while text stays visible. These rules mirror the light skin values and
+     * are safe unconditionally while WAVEDROM_THEME_MODE is pinned to 'light'.
+     * When the inline skin style works, it wins (same specificity, later in
+     * document order), so normal rendering is unchanged.
+     */
+    .gv-wavedrom-diagram svg .s1,
+    .gv-wavedrom-modal-content svg .s1 {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+    .gv-wavedrom-diagram svg .s2,
+    .gv-wavedrom-modal-content svg .s2 {
+      fill: none;
+      stroke: #000;
+      stroke-width: 0.5;
+      stroke-linecap: round;
+    }
+    .gv-wavedrom-diagram svg .s3,
+    .gv-wavedrom-modal-content svg .s3 {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1;
+      stroke-linecap: round;
+      stroke-dasharray: 1, 3;
+    }
+    .gv-wavedrom-diagram svg .s4,
+    .gv-wavedrom-modal-content svg .s4 {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+    .gv-wavedrom-diagram svg .s5,
+    .gv-wavedrom-modal-content svg .s5 {
+      fill: #fff;
+      stroke: none;
+    }
+    .gv-wavedrom-diagram svg .s6,
+    .gv-wavedrom-modal-content svg .s6 {
+      fill: #000;
+      stroke: none;
+    }
+    .gv-wavedrom-diagram svg .s16,
+    .gv-wavedrom-modal-content svg .s16 {
+      fill: none;
+      stroke: #0041c4;
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+    .gv-wavedrom-diagram svg .info,
+    .gv-wavedrom-modal-content svg .info {
+      fill: #0041c4;
+    }
+    .gv-wavedrom-diagram svg .muted,
+    .gv-wavedrom-modal-content svg .muted {
+      fill: #aaa;
+    }
+    .gv-wavedrom-diagram svg .warning,
+    .gv-wavedrom-modal-content svg .warning {
+      fill: #f6b900;
+    }
+    .gv-wavedrom-diagram svg .error,
+    .gv-wavedrom-modal-content svg .error {
+      fill: #f60000;
+    }
+    .gv-wavedrom-diagram svg .success,
+    .gv-wavedrom-modal-content svg .success {
+      fill: #00ab00;
+    }
   `;
   document.head.appendChild(style);
 };
@@ -919,7 +995,6 @@ const renderWaveDrom = async (codeEl: HTMLElement, code: string) => {
 
     codeEl.dataset.wavedromCode = code;
     codeEl.dataset.wavedromProcessing = 'false';
-    console.log('[Gemini Voyager] WaveDrom diagram rendered');
   } catch {
     codeEl.dataset.wavedromProcessing = 'false';
     teardownWaveDromForCodeElement(codeEl);
